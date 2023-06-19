@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"os"
 
@@ -18,7 +19,7 @@ func Stocks(c *fiber.Ctx) error {
 func DhanHistoricalData() {
 	// Prepare the request data
 	token := os.Getenv("TOKEN")
-	bearerToken := fmt.Sprintf("Bearer %s", token)
+	// bearerToken := fmt.Sprintf("Bearer %s", token)
 	data := map[string]interface{}{
 		"symbol":          "TCS",
 		"exchangeSegment": "NSE_EQ",
@@ -44,7 +45,7 @@ func DhanHistoricalData() {
 
 	// Set the request headers
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", bearerToken)
+	req.Header.Set("access-token", token)
 
 	// Send the request
 	client := http.Client{}
@@ -54,8 +55,29 @@ func DhanHistoricalData() {
 		return
 	}
 	defer resp.Body.Close()
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		fmt.Println("Error reading response body:", err)
+		os.Exit(1)
+	}
 
-	// Process the response
-	fmt.Println("Response status code:", resp.StatusCode)
-	// You can read the response body if needed using resp.Body
+	// Convert body to string and print
+	// Parse response into struct
+	var response DhanResponse
+	err = json.Unmarshal(body, &response)
+	if err != nil {
+		fmt.Println("Error parsing response body:", err)
+		os.Exit(1)
+	}
+	fmt.Println("Open prices:", response)
+	fmt.Println("Close prices:", response.Close)
+}
+
+type DhanResponse struct {
+	Open      []float64 `json:"open"`
+	High      []float64 `json:"high"`
+	Low       []float64 `json:"low"`
+	Close     []float64 `json:"close"`
+	Volume    []int64   `json:"volume"`
+	StartTime []int64   `json:"start_Time"`
 }
