@@ -84,12 +84,12 @@ func DhanHistoricalData() {
 }
 
 type DhanResponse struct {
-	Open      []float64 `json:"open"`
-	High      []float64 `json:"high"`
-	Low       []float64 `json:"low"`
-	Close     []float64 `json:"close"`
-	Volume    []float64 `json:"volume"`
-	StartTime []float64 `json:"start_Time"`
+	Open      []float32 `json:"open"`
+	High      []float32 `json:"high"`
+	Low       []float32 `json:"low"`
+	Close     []float32 `json:"close"`
+	Volume    []float32 `json:"volume"`
+	StartTime []float32 `json:"start_Time"`
 }
 
 func convertEpochToTime(epoch int) time.Time {

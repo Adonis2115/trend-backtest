@@ -7,7 +7,6 @@ import (
 	"github.com/Adonis2115/trend-backtest/handlers"
 	"github.com/gofiber/fiber/v2"
 	"github.com/joho/godotenv"
-	_ "github.com/lib/pq"
 )
 
 func main() {
