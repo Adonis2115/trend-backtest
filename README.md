@@ -15,3 +15,7 @@ Dhan API
 ```
 
 This file would be updated.
+
+### TODO:
+  * Create Stock and OHLC Table
+  * Populate Stock table with Stocks from FNO list.

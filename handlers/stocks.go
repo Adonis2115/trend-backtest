@@ -7,6 +7,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -25,8 +26,8 @@ func DhanHistoricalData() {
 		"exchangeSegment": "NSE_EQ",
 		"instrument":      "EQUITY",
 		"expiryCode":      0,
-		"fromDate":        "2021-01-01",
-		"toDate":          "2023-06-19",
+		"fromDate":        "2023-06-16",
+		"toDate":          "2023-06-20",
 	}
 
 	// Convert the data to JSON
@@ -64,13 +65,22 @@ func DhanHistoricalData() {
 	// Convert body to string and print
 	// Parse response into struct
 	var response DhanResponse
-	err = json.Unmarshal(body, &response)
+	err = json.Unmarshal((body), &response)
 	if err != nil {
 		fmt.Println("Error parsing response body:", err)
 		os.Exit(1)
 	}
-	fmt.Println("Open prices:", response)
-	fmt.Println("Close prices:", response.Close)
+
+	t := convertEpochToTime(int(response.StartTime[0]))
+
+	fmt.Println("Response:", response)
+	fmt.Println("Open:", response.Open[0])
+	fmt.Println("High:", response.High[0])
+	fmt.Println("Low:", response.Low[0])
+	fmt.Println("Close:", response.Close[0])
+	fmt.Println("Volume:", response.Volume[0])
+	fmt.Println("Start Time:", response.StartTime[0])
+	fmt.Println("Time:", t)
 }
 
 type DhanResponse struct {
@@ -78,6 +88,28 @@ type DhanResponse struct {
 	High      []float64 `json:"high"`
 	Low       []float64 `json:"low"`
 	Close     []float64 `json:"close"`
-	Volume    []int64   `json:"volume"`
-	StartTime []int64   `json:"start_Time"`
+	Volume    []float64 `json:"volume"`
+	StartTime []float64 `json:"start_Time"`
+}
+
+func convertEpochToTime(epoch int) time.Time {
+	// Get the time zone offset in minutes
+	_, offset := time.Now().Zone()
+	offsetMinutes := int(offset) / 60
+
+	// Calculate the IST offset
+	istOffset := int(330)
+
+	// Adjust the epoch timestamp
+	n := epoch - (istOffset+offsetMinutes)*60
+
+	// Create a base time using January 1, 1980, 05:30:00 IST
+	baseTime := time.Date(1980, 1, 1, 5, 30, 0, 0, time.FixedZone("IST", istOffset*60))
+
+	// Create the final time by setting seconds and adjusting the date
+	finalTime := baseTime.Add(time.Duration(n) * time.Second)
+
+	finalTime = finalTime.AddDate(0, 0, 1) //add 1 day to it
+
+	return finalTime
 }
